@@ -187,8 +187,15 @@ func main() {
 			return
 		}
 		if r.URL.Path == "/" {
-			r = r.Clone(r.Context())
-			r.URL.Path = "/index.html"
+			payload, err := stdfs.ReadFile(publicFS, "index.html")
+			if err != nil {
+				http.Error(w, "index page not found", http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(payload)
+			return
 		}
 		fileServer.ServeHTTP(w, r)
 	}))
