@@ -1,50 +1,58 @@
 # Local Web Navigator
 
-一个用于扫描目标主机 Web 服务并生成导航页的本地网站。
+[简体中文说明](./README.zh-CN.md)
 
-它会自动扫描目标主机上的常见 Web 端口和其他端口，判断该端口是否提供网页服务；如果是，就提取网页标题和图标，展示在首页导航卡片中，并把结果记录下来。下次进入时会优先检查历史发现过的网页，失效的网页会自动从列表中移除。
+Local Web Navigator is a lightweight web app that scans a target host for web services and turns the discovered pages into a navigation homepage.
 
-## 功能特性
+It automatically checks common web ports, falls back to a wider port scan, extracts page titles and favicons, stores discovered sites locally, and removes sites that are no longer available.
 
-- 自动扫描目标主机上的 Web 服务
-- 优先检查历史发现的网页，再扫描常见端口，最后补扫其他端口
-- 自动提取网页标题和 favicon
-- 首页只显示已发现的网页卡片
-- 右上角设置按钮可修改扫描目标并重新扫描
-- 底部悬浮进度条显示扫描状态，扫描完成后自动隐藏
-- 历史记录持久化保存
-- 已关闭或失效的网页会自动从首页移除
-- 支持 Linux Docker 部署
+## Features
 
-## 技术栈
+- Scan a target host for web services
+- Prioritize previously discovered ports before scanning other ports
+- Extract page titles and favicons automatically
+- Show only discovered sites on the homepage
+- Change scan target from the settings panel
+- Show a compact floating scan progress bar at the bottom
+- Auto-hide the progress bar when scanning completes
+- Persist discovered sites and settings locally
+- Remove offline sites automatically
+- Support Linux Docker deployment
+- Support GitHub Releases auto-build
 
-- 后端：Go
-- 前端：原生 HTML / CSS / JavaScript
-- 通信：SSE
-- 存储：本地 JSON 文件
+## Tech Stack
 
-## 项目结构
+- Backend: Go
+- Frontend: HTML, CSS, JavaScript
+- Realtime updates: SSE
+- Storage: local JSON files
+
+## Project Structure
 
 ```text
 .
-├─ main.go                # Go 后端，负责扫描、接口、静态资源服务
+├─ main.go
 ├─ public/
-│  ├─ index.html          # 首页
-│  ├─ app.js              # 前端交互逻辑
-│  └─ styles.css          # 页面样式
-├─ data/                  # 运行后生成，保存扫描历史和目标设置
-├─ Dockerfile             # Docker 镜像构建文件
-├─ docker-compose.yml     # Linux Docker 部署示例
-└─ README.md
+│  ├─ index.html
+│  ├─ app.js
+│  └─ styles.css
+├─ data/
+├─ Dockerfile
+├─ docker-compose.yml
+├─ .github/
+│  └─ workflows/
+│     └─ release.yml
+├─ README.md
+└─ LICENSE
 ```
 
-## 本地运行
+## Local Run
 
-### 1. 准备环境
+### Requirements
 
-- Go 1.25 或更高版本
+- Go 1.25+
 
-### 2. 编译
+### Build
 
 Windows PowerShell:
 
@@ -59,7 +67,7 @@ Linux / macOS:
 go build -o local-web-nav .
 ```
 
-### 3. 启动
+### Start
 
 Windows:
 
@@ -73,59 +81,51 @@ Linux / macOS:
 ./local-web-nav
 ```
 
-默认访问地址：
+Default URL:
 
 ```text
 http://127.0.0.1:3210
 ```
 
-## 环境变量
-
-支持以下环境变量：
+## Environment Variables
 
 - `PORT`
-  站点监听端口，默认 `3210`
+  Server port, default: `3210`
 - `DATA_DIR`
-  数据目录，默认 `./data`
+  Data directory, default: `./data`
 
-示例：
+Example:
 
 ```bash
 PORT=8080 DATA_DIR=./data ./local-web-nav
 ```
 
-## 数据文件
+## Data Files
 
-运行后会在 `DATA_DIR` 下生成：
+The app stores runtime data in `DATA_DIR`:
 
 - `sites.json`
-  已发现网页的历史记录
+  Discovered site history
 - `settings.json`
-  当前扫描目标设置
+  Current scan target
 
-## Docker 部署
+## Docker Deployment
 
-### 方式一：直接使用 docker compose
+### Linux Docker with compose
 
-适合 Linux 宿主机。
+Recommended for Linux hosts:
 
 ```bash
 docker compose up -d --build
 ```
 
-当前 `docker-compose.yml` 使用的是：
-
-- `network_mode: host`
-- 数据卷挂载到 `./data`
-- 自动重启
-
-启动后访问：
+Then open:
 
 ```text
-http://服务器IP:3210
+http://SERVER_IP:3210
 ```
 
-### 方式二：使用 docker run
+### Linux Docker with docker run
 
 ```bash
 docker build -t local-web-nav .
@@ -140,54 +140,93 @@ docker run -d \
   local-web-nav
 ```
 
-## 为什么 Linux Docker 推荐 host 网络
+## Why `host` Network is Recommended on Linux
 
-这个项目需要扫描目标主机上的端口和网页服务。
+This project scans ports and web services on the target host.
 
-如果容器使用默认的 `bridge` 网络：
+With Docker bridge networking, `127.0.0.1` and `localhost` usually point to the container itself instead of the host. On Linux, `network_mode: host` makes scanning behavior much closer to the real host network, so it fits this project better.
 
-- `127.0.0.1`
-- `localhost`
+## GitHub Releases Auto Build
 
-通常只指向容器自己，而不是宿主机。
+This repository includes a GitHub Actions workflow:
 
-在 Linux Docker 中使用 `host` 网络模式时，容器能更直接地看到宿主机网络，因此更适合这个项目的扫描逻辑。
+`/.github/workflows/release.yml`
 
-## 使用说明
+It automatically:
 
-1. 打开首页
-2. 首页会自动开始扫描
-3. 主页只显示扫描到的网页卡片
-4. 点击右上角设置按钮
-5. 在设置中修改扫描目标，例如：
+- builds release binaries when a tag like `v1.0.0` is pushed
+- creates a GitHub Release
+- uploads compiled binaries for multiple platforms
+
+### Included targets
+
+- Linux amd64
+- Linux arm64
+- Windows amd64
+- macOS amd64
+- macOS arm64
+
+### How to trigger a release
+
+1. Commit and push your latest code.
+2. Create a version tag locally:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+3. GitHub Actions will automatically build and publish the release.
+
+### Release files
+
+Generated assets use names like:
+
+- `local-web-nav_linux_amd64.tar.gz`
+- `local-web-nav_linux_arm64.tar.gz`
+- `local-web-nav_windows_amd64.zip`
+- `local-web-nav_darwin_amd64.tar.gz`
+- `local-web-nav_darwin_arm64.tar.gz`
+
+## Usage
+
+1. Open the homepage
+2. The app starts scanning automatically
+3. The homepage shows only discovered web pages
+4. Click the settings button in the top-right corner
+5. Change the scan target, for example:
    - `192.168.1.10`
    - `localhost`
    - `127.0.0.1`
-6. 点击“应用并扫描”
+6. Click `Apply and Scan`
 
-## 扫描逻辑说明
+## Scan Logic
 
-扫描顺序：
+Scan order:
 
-1. 优先扫描历史发现过的端口
-2. 扫描常见 Web 端口
-3. 扫描其余端口
+1. Previously discovered ports
+2. Common web ports
+3. Remaining ports
 
-网页识别方式：
+Page detection:
 
-- 响应头包含 `text/html` 或 `application/xhtml+xml`
-- 或返回内容中包含 `<html`、`<title`、`<!doctype html`
+- `Content-Type` contains `text/html` or `application/xhtml+xml`
+- or the response body contains `<html`, `<title`, or `<!doctype html`
 
-页面名称来源：
+Page naming:
 
 1. `<title>`
-2. `Server` 响应头
-3. `IP:端口`
+2. `Server` header
+3. `IP:port`
 
-## 注意事项
+## Notes
 
-- 请只扫描你自己有权限管理的主机和网络
-- 全端口扫描会占用一定时间和网络资源
-- 如果目标主机端口很多，首次扫描时间会比历史扫描更长
-- 在 Docker 中扫描 `localhost` 时，推荐 Linux 宿主机使用 `host` 网络模式
+- Scan only hosts and networks you are authorized to manage
+- Full port scans can take time
+- First scan is slower than later scans because history is empty
+- In Docker, scanning `localhost` behaves best on Linux with `host` networking
 
+
+## License
+
+MIT
