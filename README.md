@@ -166,27 +166,6 @@ It automatically:
 - macOS amd64
 - macOS arm64
 
-### How to trigger a release
-
-1. Commit and push your latest code.
-2. Create a version tag locally:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-3. GitHub Actions will automatically build and publish the release.
-
-### Release files
-
-Generated assets use names like:
-
-- `local-web-nav_linux_amd64.tar.gz`
-- `local-web-nav_linux_arm64.tar.gz`
-- `local-web-nav_windows_amd64.zip`
-- `local-web-nav_darwin_amd64.tar.gz`
-- `local-web-nav_darwin_arm64.tar.gz`
 
 ## Usage
 

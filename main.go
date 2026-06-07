@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
 	"io"
+	stdfs "io/fs"
 	"log"
 	"net"
 	"net/http"
@@ -46,6 +48,9 @@ var (
 	hostPattern  = regexp.MustCompile(`^[a-zA-Z0-9.-]+$`)
 	defaultIcon  = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23132238'/%3E%3Cpath d='M18 22.5c0-2.5 2-4.5 4.5-4.5h19c2.5 0 4.5 2 4.5 4.5v13c0 2.5-2 4.5-4.5 4.5h-8.5l-5 6.5c-.7.8-2 .3-2-.8V40h-3.5c-2.5 0-4.5-2-4.5-4.5v-13Z' fill='%2368d5ff'/%3E%3Ccircle cx='25' cy='29' r='2.2' fill='%23132238'/%3E%3Ccircle cx='32' cy='29' r='2.2' fill='%23132238'/%3E%3Ccircle cx='39' cy='29' r='2.2' fill='%23132238'/%3E%3C/svg%3E"
 )
+
+//go:embed public/*
+var embeddedAssets embed.FS
 
 type Site struct {
 	ID           string `json:"id"`
@@ -133,6 +138,10 @@ func main() {
 
 	store := NewStore(filepath.Join(dataDir, "sites.json"))
 	scanner := NewScanner(store, filepath.Join(dataDir, "settings.json"))
+	publicFS, err := stdfs.Sub(embeddedAssets, "public")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/state", func(w http.ResponseWriter, r *http.Request) {
@@ -171,16 +180,15 @@ func main() {
 		scanner.ServeEvents(w, r)
 	})
 
-	publicDir := filepath.Join(root, "public")
-	fileServer := http.FileServer(http.Dir(publicDir))
+	fileServer := http.FileServer(http.FS(publicFS))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			http.NotFound(w, r)
 			return
 		}
 		if r.URL.Path == "/" {
-			http.ServeFile(w, r, filepath.Join(publicDir, "index.html"))
-			return
+			r = r.Clone(r.Context())
+			r.URL.Path = "/index.html"
 		}
 		fileServer.ServeHTTP(w, r)
 	}))

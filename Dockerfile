@@ -16,7 +16,6 @@ ENV PORT=3210
 ENV DATA_DIR=/data
 
 COPY --from=build /out/local-web-nav /app/local-web-nav
-COPY public /app/public
 
 RUN adduser -D -H -u 10001 appuser \
     && mkdir -p /data \

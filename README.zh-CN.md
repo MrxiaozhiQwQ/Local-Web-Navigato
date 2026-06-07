@@ -168,25 +168,6 @@ docker run -d \
 - macOS amd64
 - macOS arm64
 
-### 如何触发自动发布
-
-1. 先提交并推送最新代码
-2. 本地创建版本标签，例如：
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-3. GitHub Actions 会自动构建并发布 Release
-
-### 生成的文件示例
-
-- `local-web-nav_linux_amd64.tar.gz`
-- `local-web-nav_linux_arm64.tar.gz`
-- `local-web-nav_windows_amd64.zip`
-- `local-web-nav_darwin_amd64.tar.gz`
-- `local-web-nav_darwin_arm64.tar.gz`
 
 ## 使用说明
 
