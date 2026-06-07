@@ -1,0 +1,10 @@
+{
+  "name": "local-web-nav",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local web service scanner and navigation homepage",
+  "scripts": {
+    "build": "set \"GOCACHE=%CD%\\.gocache\" && \"C:\\Program Files\\Go\\bin\\go.exe\" build -o local-web-nav.exe .",
+    "start": "local-web-nav.exe"
+  }
+}

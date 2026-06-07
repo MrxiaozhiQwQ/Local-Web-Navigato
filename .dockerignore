@@ -1,0 +1,7 @@
+.git
+.gocache
+data
+local-web-nav.exe
+local-web-nav.exe~
+server.err.log
+server.out.log

@@ -1,0 +1,13 @@
+services:
+  local-web-nav:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: local-web-nav
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PORT: "3210"
+      DATA_DIR: /data
+    volumes:
+      - ./data:/data

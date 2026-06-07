@@ -1,0 +1,7 @@
+.gocache/
+data/
+local-web-nav
+local-web-nav.exe
+local-web-nav.exe~
+server.err.log
+server.out.log
